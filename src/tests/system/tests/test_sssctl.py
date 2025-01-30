@@ -1118,7 +1118,7 @@ def test_sssctl__analyze_child_logs(client: Client, ipa: IPA):
     client.sssd.stop()
     client.sssd.clear(db=True, memcache=True, logs=True)
     client.sssd.start()
-    time.sleep(5)
+    time.sleep(10)
 
     with pytest.raises(SSHAuthenticationError):
         client.ssh("user1", "Wrong").connect()
