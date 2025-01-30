@@ -1102,6 +1102,7 @@ def test_sssctl__analyze_child_logs(client: Client, ipa: IPA):
         5. Child (krb5) Logs contain info about failed login
     :customerscenario: True
     """
+    client.host.conn.run("setenforce 0", raise_on_error=False)
     ipa.user("user1").add()
     client.sssd.nss["debug_level"] = "9"
     client.sssd.pam["debug_level"] = "9"
@@ -1118,13 +1119,13 @@ def test_sssctl__analyze_child_logs(client: Client, ipa: IPA):
     client.sssd.stop()
     client.sssd.clear(db=True, memcache=True, logs=True)
     client.sssd.start()
-    time.sleep(10)
+    time.sleep(15)
 
     with pytest.raises(SSHAuthenticationError):
         client.ssh("user1", "Wrong").connect()
     result = client.sssctl.analyze_request("show --pam --child 1")
     assert "Preauthentication failed" in result.stdout, "'Preauthentication failed' was not found!"
-
+    client.host.conn.run("setenforce 1", raise_on_error=False)
 
 @pytest.mark.tools
 @pytest.mark.ticket(bz=[2142960, 2142794, 2142961])
